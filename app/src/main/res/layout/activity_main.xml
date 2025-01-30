@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Features"
+            android:fontFamily="sans-serif-condensed-medium"
+            style="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Privileged Permissions"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="System App Installation"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Interacting with System Services"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Upgrading Existing System Apps"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Bypassing Certain Security Checks"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result5"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Full Root Access"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result6"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Bypassing SELinux / Scoped Storage"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result7"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Accessing Kernel-Level Features"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result8"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Bypassing App Sandboxing"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result9"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text=" Disabling Security Features (e.g., FRP, AVB)"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result10"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"/>
+
+
+
+
+    </LinearLayout>
+
+</ScrollView>
