@@ -1,5 +1,6 @@
 package com.deep.system
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,6 +11,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -72,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             if(isChecked){
                 binding.result3.text = "Possible"
                 binding.result3.setTextColor(resources.getColor(R.color.greenColor))
-                if(isSystemApp("com.deep.system")){
+                if(isSystemApp()){
                     Toast.makeText(this,"Success checking system app",Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this,"Error checking system app",Toast.LENGTH_LONG).show()
@@ -215,7 +217,6 @@ class MainActivity : AppCompatActivity() {
             return false
         }
     }
-
     private fun installApkSilently() : Boolean {
         try {
             val packageInstaller = packageManager.packageInstaller
@@ -223,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             val sessionId = packageInstaller.createSession(sessionParams)
             val session = packageInstaller.openSession(sessionId)
 
-            val apkFile = File("apkPath") // Change this to actual APK path
+            val apkFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "base.apk")
             apkFile.inputStream().use { inputStream ->
                 session.openWrite("base.apk", 0, apkFile.length()).use { outputStream ->
                     inputStream.copyTo(outputStream)
@@ -244,15 +245,16 @@ class MainActivity : AppCompatActivity() {
             return false
         }
     }
-    private fun isSystemApp(packageName: String): Boolean {
+    private fun isSystemApp(): Boolean {
         val systemAppPaths = listOf("/system/app/", "/system/priv-app/")
         return try {
-            val apkPath = "/data/app/$packageName/base.apk"
-            systemAppPaths.any { File(apkPath).exists() }
+            val apkPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            systemAppPaths.any { File(apkPath, "base.apk").exists() }
         } catch (e: Exception) {
             false
         }
     }
+    @SuppressLint("PrivateApi")
     private fun testInternalApis() : Boolean {
         try {
             Class.forName("com.android.internal.app.ActivityTrigger")
