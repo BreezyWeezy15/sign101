@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_marginBottom="20dp"
         tools:context=".MainActivity">
 
         <TextView
@@ -414,52 +415,8 @@
             android:layout_marginTop="5dp"
             android:background="@color/black"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal">
 
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Bypassing App Sandboxing"
-                    android:layout_gravity="center"
-                    android:gravity="center|start"
-                    style="@style/TextAppearance.AppCompat.Medium"/>
-
-
-                <TextView
-                    android:id="@+id/result9"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="--"
-                    android:layout_marginTop="5dp"
-                    android:layout_gravity="center"
-                    android:gravity="center|start"
-                    style="@style/TextAppearance.AppCompat.Medium"/>
-            </LinearLayout>
-
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switchCompat9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:background="@color/black"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -502,7 +459,201 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
-        
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Bypassing App Sandboxing"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result9"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Disable Wi-Fi"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result11"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/black"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Disable Mobile Data"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result12"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/black"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Enable/Disable Airplane Mode "
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+                <TextView
+                    android:id="@+id/result13"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="--"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center|start"
+                    style="@style/TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchCompat13"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
     </LinearLayout>
 
 </ScrollView>
