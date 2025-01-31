@@ -20,7 +20,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.deep.system.databinding.ActivityMainBinding
+import com.google.android.gms.common.GoogleApiAvailability
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.security.MessageDigest
 
 class MainActivity : AppCompatActivity() {
@@ -40,11 +43,14 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat1.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result1.text = "Possible"
                 binding.result1.setTextColor(resources.getColor(R.color.greenColor))
                 if(testWriteSecureSettings()){
+                    binding.result1.text = "Possible"
+                    binding.result1.setTextColor(resources.getColor(R.color.greenColor))
                     Toast.makeText(this,"Successfully changed Secure Settings",Toast.LENGTH_LONG).show()
                 } else {
+                    binding.result1.text = "Not Possible"
+                    binding.result1.setTextColor(resources.getColor(R.color.redColor))
                     Toast.makeText(this,"Permission denied",Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -56,11 +62,14 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat2.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result2.text = "Possible"
                 binding.result2.setTextColor(resources.getColor(R.color.greenColor))
                 if(installApkSilently()){
+                    binding.result2.text = "Possible"
+                    binding.result2.setTextColor(resources.getColor(R.color.greenColor))
                     Toast.makeText(this, "Silent installation triggered", Toast.LENGTH_LONG).show()
                 } else {
+                    binding.result2.text = "Not Possible"
+                    binding.result2.setTextColor(resources.getColor(R.color.redColor))
                     Toast.makeText(this, "Failed to install APK silently", Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -72,11 +81,14 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat3.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result3.text = "Possible"
                 binding.result3.setTextColor(resources.getColor(R.color.greenColor))
                 if(isSystemApp()){
+                    binding.result3.text = "Possible"
+                    binding.result3.setTextColor(resources.getColor(R.color.greenColor))
                     Toast.makeText(this,"Success checking system app",Toast.LENGTH_LONG).show()
                 } else {
+                    binding.result3.text = "Not Possible"
+                    binding.result3.setTextColor(resources.getColor(R.color.redColor))
                     Toast.makeText(this,"Error checking system app",Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -88,11 +100,14 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat4.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result4.text = "Possible"
                 binding.result4.setTextColor(resources.getColor(R.color.greenColor))
                 if(testInternalApis()){
+                    binding.result4.text = "Possible"
+                    binding.result4.setTextColor(resources.getColor(R.color.greenColor))
                     Toast.makeText(this,"Access to internal API succeeded",Toast.LENGTH_LONG).show()
                 } else {
+                    binding.result4.text = "Not Possible"
+                    binding.result4.setTextColor(resources.getColor(R.color.redColor))
                     Toast.makeText(this,"Access to internal API failed",Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -104,11 +119,14 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat5.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result5.text = "Possible"
                 binding.result5.setTextColor(resources.getColor(R.color.greenColor))
                 if(isUpgradingExistingSystemApp("com.deep.system")){
+                    binding.result5.text = "Possible"
+                    binding.result5.setTextColor(resources.getColor(R.color.greenColor))
                     Toast.makeText(this,"Systep App Upgrade Success",Toast.LENGTH_LONG).show()
                 } else {
+                    binding.result5.text = "Not Possible"
+                    binding.result5.setTextColor(resources.getColor(R.color.redColor))
                     Toast.makeText(this,"System App Upgrade Failed",Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -120,8 +138,16 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat6.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result6.text = "Not Possible"
                 binding.result6.setTextColor(resources.getColor(R.color.redColor))
+                if(testRootAccess()){
+                    binding.result6.text = "Possible"
+                    binding.result6.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Root access available!",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result6.text = "Not Possible"
+                    binding.result6.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Root access denied.",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result6.text = "--"
                 binding.result6.setTextColor(resources.getColor(R.color.black))
@@ -133,10 +159,11 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat7.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result7.setText("Not Possible")
+                binding.result7.text = "Not Possible"
                 binding.result7.setTextColor(resources.getColor(R.color.redColor))
+                testModifyOtherAppData()
             } else {
-                binding.result7.setText("--")
+                binding.result7.text = "--"
                 binding.result7.setTextColor(resources.getColor(R.color.black))
             }
 
@@ -157,6 +184,7 @@ class MainActivity : AppCompatActivity() {
             if(isChecked){
                 binding.result9.text = "Not Possible"
                 binding.result9.setTextColor(resources.getColor(R.color.redColor))
+                testSandboxBypass()
             } else {
                 binding.result9.text = "--"
                 binding.result9.setTextColor(resources.getColor(R.color.black))
@@ -168,6 +196,7 @@ class MainActivity : AppCompatActivity() {
             if(isChecked){
                 binding.result10.text = "Not Possible"
                 binding.result10.setTextColor(resources.getColor(R.color.redColor))
+                testDisableFRP()
             } else {
                 binding.result10.text = "--"
                 binding.result10.setTextColor(resources.getColor(R.color.black))
@@ -294,6 +323,91 @@ class MainActivity : AppCompatActivity() {
         return mySignature == systemSignature
     }
 
+
+    /////////////////////
+
+    private fun testRootAccess() : Boolean {
+        try {
+            val process = Runtime.getRuntime().exec("su")
+            val output = BufferedReader(InputStreamReader(process.inputStream)).readLine()
+            if (output != null) {
+                return true
+            } else {
+                return false
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this,"Failed to execute root command",Toast.LENGTH_LONG).show()
+            return false
+        }
+    }
+    private fun testModifyOtherAppData() {
+        val targetPath = File("/data/data/com.other.app/files/test.txt")
+        try {
+            if (targetPath.exists()) {
+                targetPath.writeText("Test")
+                Toast.makeText(this,"Modified another app’s data!",Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this,"Cannot access other app’s data.",Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this,"SELinux blocked access",Toast.LENGTH_LONG).show()
+        }
+    }
+    private fun testSandboxBypass() {
+        val targetFile = File("/data/data/com.some.other.app/shared_prefs/config.xml")
+        try {
+            if (targetFile.exists()) {
+                val data = targetFile.readText()
+                Log.d("SystemAppTest", "Read another app’s data: $data")
+            } else {
+                Log.e("SystemAppTest", "Cannot access another app’s data.")
+            }
+        } catch (e: Exception) {
+            Log.e("SystemAppTest", "Sandboxing prevented access: ${e.message}")
+        }
+    }
+    private fun testDisableFRP() {
+        try {
+            Settings.Global.putInt(contentResolver, "device_provisioned", 0)
+            Log.d("SystemAppTest", "Disabled FRP!")
+        } catch (e: SecurityException) {
+            Log.e("SystemAppTest", "FRP is protected: ${e.message}")
+        }
+    }
+    private fun testModifyKernel() {
+        val cpuFile = File("/proc/sys/kernel/hostname")
+        try {
+            if (cpuFile.exists()) {
+                cpuFile.writeText("HackedKernel")
+                Log.d("SystemAppTest", "Kernel modification successful!")
+            } else {
+                Log.e("SystemAppTest", "Cannot modify kernel settings.")
+            }
+        } catch (e: Exception) {
+            Log.e("SystemAppTest", "Kernel protection blocked modification: ${e.message}")
+        }
+    }
+    private fun testModifySystemApp() {
+        val targetApk = File("/system/app/Calculator/Calculator.apk")
+        try {
+            if (targetApk.exists()) {
+                targetApk.writeText("Modified")
+                Log.d("SystemAppTest", "Modified system app!")
+            } else {
+                Log.e("SystemAppTest", "Cannot modify system app.")
+            }
+        } catch (e: Exception) {
+            Log.e("SystemAppTest", "System protection blocked modification: ${e.message}")
+        }
+    }
+    private fun testPlayServicesAccess(context: Context) {
+        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+        if (status == com.google.android.gms.common.ConnectionResult.SUCCESS) {
+            Log.d("SystemAppTest", "Google Play Services available!")
+        } else {
+            Log.e("SystemAppTest", "Google Play Services check failed.")
+        }
+    }
 
     /// RECEIVER
     class InstallResultReceiver : BroadcastReceiver() {
