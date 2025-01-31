@@ -10,6 +10,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
@@ -154,14 +155,19 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-
-        /////////////////////////
         binding.switchCompat7.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result7.text = "Not Possible"
                 binding.result7.setTextColor(resources.getColor(R.color.redColor))
-                testModifyOtherAppData()
+                if(testModifyOtherAppData()){
+                    binding.result7.text = "Not Possible"
+                    binding.result7.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Success.",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result7.text = "Not Possible"
+                    binding.result7.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Selinux blocked data ,Cannot access other app’s data.",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result7.text = "--"
                 binding.result7.setTextColor(resources.getColor(R.color.black))
@@ -171,8 +177,16 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat8.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result8.text = "Not Possible"
                 binding.result8.setTextColor(resources.getColor(R.color.redColor))
+                if(testModifyKernel()){
+                    binding.result8.text = "Possible"
+                    binding.result8.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Kernel modification successful!",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result8.text = "Not Possible"
+                    binding.result8.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Kernel modification failed!",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result8.text = "--"
                 binding.result8.setTextColor(resources.getColor(R.color.black))
@@ -182,9 +196,16 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat9.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result9.text = "Not Possible"
                 binding.result9.setTextColor(resources.getColor(R.color.redColor))
-                testSandboxBypass()
+                if(testSandboxBypass()){
+                    binding.result9.text = "Possible"
+                    binding.result9.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Success bypassing sandbox",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result9.text = "Not Possible"
+                    binding.result9.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Failed to bypass sandbox",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result9.text = "--"
                 binding.result9.setTextColor(resources.getColor(R.color.black))
@@ -196,7 +217,11 @@ class MainActivity : AppCompatActivity() {
             if(isChecked){
                 binding.result10.text = "Not Possible"
                 binding.result10.setTextColor(resources.getColor(R.color.redColor))
-                testDisableFRP()
+                if(testDisableFRP()){
+                    Toast.makeText(this,"Disabled FRP!",Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this,"FRP is protected",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result10.text = "--"
                 binding.result10.setTextColor(resources.getColor(R.color.black))
@@ -206,8 +231,15 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat11.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result11.text = "Possible"
-                binding.result11.setTextColor(resources.getColor(R.color.greenColor))
+                if(setWiFiEnabled()){
+                    binding.result11.text = "Possible"
+                    binding.result11.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Wifi Enabled Successfully",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result11.text = "Not Possible"
+                    binding.result11.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Wifi Disabled",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result11.text = "--"
                 binding.result11.setTextColor(resources.getColor(R.color.black))
@@ -217,8 +249,16 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat12.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result12.text = "Not Possible"
                 binding.result12.setTextColor(resources.getColor(R.color.redColor))
+                if(setMobileDataEnabled()){
+                    binding.result12.text = "Possible"
+                    binding.result12.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Mobile data enabled",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result12.text = "Not Possible"
+                    binding.result12.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Mobile data disabled",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result12.text = "--"
                 binding.result12.setTextColor(resources.getColor(R.color.black))
@@ -228,15 +268,26 @@ class MainActivity : AppCompatActivity() {
         binding.switchCompat13.setOnCheckedChangeListener { buttonView, isChecked ->
 
             if(isChecked){
-                binding.result13.text = "Not Possible"
                 binding.result13.setTextColor(resources.getColor(R.color.redColor))
+                if(setAirplaneMode()){
+                    binding.result13.text = "Possible"
+                    binding.result13.setTextColor(resources.getColor(R.color.greenColor))
+                    Toast.makeText(this,"Airplane mode enabled",Toast.LENGTH_LONG).show()
+                } else {
+                    binding.result13.text = "Not Possible"
+                    binding.result13.setTextColor(resources.getColor(R.color.redColor))
+                    Toast.makeText(this,"Failed to enable airplane mode",Toast.LENGTH_LONG).show()
+                }
             } else {
                 binding.result13.text = "--"
                 binding.result13.setTextColor(resources.getColor(R.color.black))
             }
 
         }
+
+
     }
+
 
     private fun testWriteSecureSettings() : Boolean {
         try {
@@ -340,72 +391,94 @@ class MainActivity : AppCompatActivity() {
             return false
         }
     }
-    private fun testModifyOtherAppData() {
+    private fun testModifyOtherAppData() : Boolean {
         val targetPath = File("/data/data/com.other.app/files/test.txt")
         try {
             if (targetPath.exists()) {
                 targetPath.writeText("Test")
-                Toast.makeText(this,"Modified another app’s data!",Toast.LENGTH_LONG).show()
+                return true
             } else {
-                Toast.makeText(this,"Cannot access other app’s data.",Toast.LENGTH_LONG).show()
+                return false
             }
         } catch (e: Exception) {
-            Toast.makeText(this,"SELinux blocked access",Toast.LENGTH_LONG).show()
+            return false
         }
     }
-    private fun testSandboxBypass() {
+    private fun testSandboxBypass() : Boolean {
         val targetFile = File("/data/data/com.some.other.app/shared_prefs/config.xml")
         try {
             if (targetFile.exists()) {
-                val data = targetFile.readText()
-                Log.d("SystemAppTest", "Read another app’s data: $data")
+                targetFile.readText()
+                return true
             } else {
-                Log.e("SystemAppTest", "Cannot access another app’s data.")
+                return false
             }
         } catch (e: Exception) {
-            Log.e("SystemAppTest", "Sandboxing prevented access: ${e.message}")
+            return false
         }
     }
-    private fun testDisableFRP() {
+    private fun testDisableFRP() : Boolean {
         try {
             Settings.Global.putInt(contentResolver, "device_provisioned", 0)
-            Log.d("SystemAppTest", "Disabled FRP!")
+            return true
         } catch (e: SecurityException) {
-            Log.e("SystemAppTest", "FRP is protected: ${e.message}")
+            return false
         }
     }
-    private fun testModifyKernel() {
+    private fun testModifyKernel() : Boolean {
         val cpuFile = File("/proc/sys/kernel/hostname")
         try {
             if (cpuFile.exists()) {
                 cpuFile.writeText("HackedKernel")
-                Log.d("SystemAppTest", "Kernel modification successful!")
+                return true
             } else {
                 Log.e("SystemAppTest", "Cannot modify kernel settings.")
+                return false
             }
         } catch (e: Exception) {
             Log.e("SystemAppTest", "Kernel protection blocked modification: ${e.message}")
+            return false
         }
     }
-    private fun testModifySystemApp() {
-        val targetApk = File("/system/app/Calculator/Calculator.apk")
+    private fun setAirplaneMode() : Boolean {
         try {
-            if (targetApk.exists()) {
-                targetApk.writeText("Modified")
-                Log.d("SystemAppTest", "Modified system app!")
-            } else {
-                Log.e("SystemAppTest", "Cannot modify system app.")
-            }
+
+            Settings.Global.putInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 1)
+            val intent = Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+            intent.putExtra("state", true)
+            sendBroadcast(intent)
+            return true
+        } catch (e: SecurityException) {
+            Log.e("SystemAppTest", "Permission denied: ${e.message}")
+            return false
         } catch (e: Exception) {
-            Log.e("SystemAppTest", "System protection blocked modification: ${e.message}")
+            Log.e("SystemAppTest", "Failed to change Airplane mode: ${e.message}")
+            return false
         }
     }
-    private fun testPlayServicesAccess(context: Context) {
-        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
-        if (status == com.google.android.gms.common.ConnectionResult.SUCCESS) {
-            Log.d("SystemAppTest", "Google Play Services available!")
-        } else {
-            Log.e("SystemAppTest", "Google Play Services check failed.")
+    private fun setMobileDataEnabled() : Boolean {
+        try {
+            Settings.Global.putInt(contentResolver, "mobile_data", 1)
+            return true
+        } catch (e: SecurityException) {
+            Log.e("SystemAppTest", "Permission denied: ${e.message}")
+            return false
+        } catch (e: Exception) {
+            Log.e("SystemAppTest", "Failed to change mobile data state: ${e.message}")
+            return false
+        }
+    }
+    private fun setWiFiEnabled() : Boolean {
+        try {
+            val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiManager.isWifiEnabled = true
+            return true
+        } catch (e: SecurityException) {
+            Log.e("SystemAppTest", "Permission denied: ${e.message}")
+            return false
+        } catch (e: Exception) {
+            Log.e("SystemAppTest", "Failed to change WiFi state: ${e.message}")
+            return false
         }
     }
 
