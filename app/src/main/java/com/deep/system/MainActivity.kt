@@ -184,20 +184,22 @@ class MainActivity : AppCompatActivity() {
         generateReceiversExcelReport(results)
     }
     private fun generateReceiversExcelReport(results: List<Pair<String, String>>) {
+
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet("Broadcast Receivers Report")
 
-        // Create header row
         val headerRow = sheet.createRow(0)
-        headerRow.createCell(0).setCellValue("Receiver Name")
-        headerRow.createCell(1).setCellValue("Registration Status")
-        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256)
-        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256)
+        headerRow.createCell(0).setCellValue("Receiver")
+        headerRow.createCell(1).setCellValue("Status")
+
         results.forEachIndexed { index, result ->
             val row: Row = sheet.createRow(index + 1)
             row.createCell(0).setCellValue(result.first)
             row.createCell(1).setCellValue(result.second)
         }
+
+        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256)
+        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256)
 
         val externalStorageDir = Environment.getExternalStorageDirectory()
         val xlsFolder = File(externalStorageDir, "xlsx")
@@ -206,7 +208,8 @@ class MainActivity : AppCompatActivity() {
             xlsFolder.mkdirs()
         }
 
-        val file = File(xlsFolder, "broadcast_receivers_report.xlsx")
+        val documentId  = System.currentTimeMillis().toString()
+        val file = File(xlsFolder, "broadcast_receivers_report$documentId.xlsx")
 
         try {
             val fileOutputStream = FileOutputStream(file)
@@ -217,12 +220,10 @@ class MainActivity : AppCompatActivity() {
 
             Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
 
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Toast.makeText(this, "Failed to save Excel report", Toast.LENGTH_LONG).show()
             e.printStackTrace()
-        }
-        finally {
+        } finally {
             try {
                 workbook.close()
             } catch (e: Exception) {
@@ -230,6 +231,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     override fun onResume() {
         super.onResume()
         checkAndRequestManageExternalStorage()
@@ -584,8 +586,7 @@ class MainActivity : AppCompatActivity() {
         return maxLength
     }
 
-
-
+    
     ////////////////////////////////////////////////
 
     private fun testWriteSecureSettings() : Boolean {
