@@ -3,6 +3,7 @@ package com.deep.system
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
@@ -10,24 +11,110 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.deep.system.databinding.ActivityMainBinding
 import com.google.android.gms.common.GoogleApiAvailability
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.BufferedReader
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStreamReader
 import java.security.MessageDigest
 
 class MainActivity : AppCompatActivity() {
+
+    private val permissionsToCheck = listOf(
+        "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BROADCAST_STICKY",
+        "android.permission.CHANGE_NETWORK_STATE",
+        "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+        "android.permission.CHANGE_WIFI_STATE",
+        "android.permission.DISABLE_KEYGUARD",
+        "android.permission.EXPAND_STATUS_BAR",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.GET_PACKAGE_SIZE",
+        "android.permission.INTERNET",
+        "android.permission.KILL_BACKGROUND_PROCESSES",
+        "android.permission.MANAGE_OWN_CALLS",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.NFC",
+        "android.permission.READ_SYNC_SETTINGS",
+        "android.permission.READ_SYNC_STATS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.REORDER_TASKS",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "android.permission.SET_ALARM",
+        "android.permission.SET_TIME_ZONE",
+        "android.permission.SET_WALLPAPER",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR",
+        "android.permission.CAMERA",
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.GET_ACCOUNTS",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.CALL_PHONE",
+        "android.permission.READ_CALL_LOG",
+        "android.permission.WRITE_CALL_LOG",
+        "android.permission.ADD_VOICEMAIL",
+        "android.permission.USE_SIP",
+        "android.permission.PROCESS_OUTGOING_CALLS",
+        "android.permission.BODY_SENSORS",
+        "android.permission.SEND_SMS",
+        "android.permission.RECEIVE_SMS",
+        "android.permission.READ_SMS",
+        "android.permission.RECEIVE_WAP_PUSH",
+        "android.permission.RECEIVE_MMS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WRITE_SETTINGS",
+        "android.permission.REQUEST_INSTALL_PACKAGES",
+        "android.permission.PACKAGE_USAGE_STATS",
+        "android.permission.BIND_ACCESSIBILITY_SERVICE",
+        "android.permission.BIND_VPN_SERVICE",
+        "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE",
+        "android.permission.BIND_INPUT_METHOD",
+        "android.permission.BIND_DEVICE_ADMIN"
+    )
+    private var currentPermissionIndex = 0
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val manageStoragePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (isManageExternalStorageGranted()) {
+                Toast.makeText(this, "Permission Granted!", Toast.LENGTH_SHORT).show()
+                checkPermissionsAndGenerateReport() // Execute after permission is granted
+            } else {
+                Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     private lateinit var binding : ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +127,42 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+
+        setUpUI()
+
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        checkAndRequestManageExternalStorage()
+    }
+
+    private fun isManageExternalStorageGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            true
+        }
+    }
+
+    private fun checkAndRequestManageExternalStorage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!isManageExternalStorageGranted()) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                manageStoragePermissionLauncher.launch(intent)
+            } else {
+                checkPermissionsAndGenerateReport()
+            }
+        } else {
+            checkPermissionsAndGenerateReport()
+        }
+    }
+
+
+    private fun setUpUI(){
 
         binding.switchCompat1.setOnCheckedChangeListener { buttonView, isChecked ->
 
@@ -285,8 +408,106 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
     }
+
+    private fun checkPermissionsAndGenerateReport() {
+        val results = mutableListOf<Pair<String, String>>()
+        checkNextPermission(results)
+    }
+
+    private fun checkNextPermission(results: MutableList<Pair<String, String>>) {
+        if (currentPermissionIndex < permissionsToCheck.size) {
+            val fullPermission = permissionsToCheck[currentPermissionIndex]
+            val permissionName = fullPermission.substringAfterLast(".") // Extracts only the name
+            val isGranted = checkSelfPermission(fullPermission) == PackageManager.PERMISSION_GRANTED
+            val status = if (isGranted) "Granted" else "Not Granted"
+
+            results.add(Pair(permissionName, status))
+            showToast(permissionName, isGranted)
+
+            handler.postDelayed({
+                currentPermissionIndex++
+                checkNextPermission(results)
+            }, 1000)
+        } else {
+            // Run this only once when all permissions are checked
+            generateExcelReport(results)
+        }
+    }
+
+    private fun showToast(permissionName: String, isGranted: Boolean) {
+        val status = if (isGranted) "Granted" else "Not Granted"
+        Toast.makeText(this, "$permissionName: $status", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun generateExcelReport(results: List<Pair<String, String>>) {
+
+
+
+        val workbook = XSSFWorkbook()
+        val sheet = workbook.createSheet("Permissions Report")
+
+        // Create header row
+        val headerRow = sheet.createRow(0)
+        headerRow.createCell(0).setCellValue("Permission")
+        headerRow.createCell(1).setCellValue("Status")
+
+        results.forEachIndexed { index, result ->
+            val row: Row = sheet.createRow(index + 1)
+            row.createCell(0).setCellValue(result.first)
+            row.createCell(1).setCellValue(result.second)
+        }
+
+        // Manually adjust the column width based on the content
+        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256) // Permission column
+        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256) // Status column
+
+        // Define external storage directory
+        val externalStorageDir = Environment.getExternalStorageDirectory()
+        val xlsFolder = File(externalStorageDir, "xlsx")
+
+        if (!xlsFolder.exists()) {
+            xlsFolder.mkdirs() // Create folder if it doesn't exist
+        }
+        val documentId  = System.currentTimeMillis().toString()
+        val file = File(xlsFolder, "permissions_report$documentId.xlsx")
+
+        try {
+            // Use FileOutputStream to write the workbook to the file
+            val fileOutputStream = FileOutputStream(file)
+            workbook.write(fileOutputStream)
+
+            // Close the file output stream to properly save the file
+            fileOutputStream.flush() // Ensure all data is written
+            fileOutputStream.close() // Properly close the stream
+
+            Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to save Excel report", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        } finally {
+            try {
+                workbook.close() // Ensure workbook is closed after writing
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // Function to calculate the maximum length of content in the specified column
+    private fun getMaxLength(results: List<Pair<String, String>>, columnIndex: Int): Int {
+        var maxLength = 0
+        // Calculate the maximum length of the content in the column
+        results.forEach {
+            val length = it.toList()[columnIndex].length
+            if (length > maxLength) {
+                maxLength = length
+            }
+        }
+        return maxLength
+    }
+
 
 
     private fun testWriteSecureSettings() : Boolean {
