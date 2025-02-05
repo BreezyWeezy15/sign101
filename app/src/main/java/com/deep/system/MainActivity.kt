@@ -1,43 +1,24 @@
 package com.deep.system
 
-import android.annotation.SuppressLint
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
-import android.content.pm.PackageInfo
-import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.net.Uri
-import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.deep.system.databinding.ActivityMainBinding
-import com.google.android.gms.common.GoogleApiAvailability
-import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
-import java.security.MessageDigest
 
 class MainActivity : AppCompatActivity() {
 
@@ -154,67 +135,73 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        setUpUI()
-        binding.file.setOnClickListener {
-            checkBroadcastReceivers()
-        }
-
     }
 
-    private fun checkBroadcastReceivers() {
+    private fun checkBroadcastReceivers(permissionsResults: List<Pair<String, String>>) {
         val packageManager = packageManager
         val packageName = packageName
 
-        val results = mutableListOf<Pair<String, String>>()
+        val receiversResults = mutableListOf<Pair<String, String>>()
 
         for (action in broadcastActions) {
-
             val intent = Intent(action)
             val receivers = packageManager.queryBroadcastReceivers(intent, PackageManager.MATCH_ALL)
             val isRegisteredForApp = receivers.any { it.activityInfo.packageName == packageName }
             val receiverName = action.substringAfterLast(".")
             val registrationStatus = if (isRegisteredForApp) "Registered" else "Not Registered"
-            results.add(Pair(receiverName, registrationStatus))
-            val message = "$receiverName: $registrationStatus"
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-            Log.d("BroadcastCheck", message)
+            receiversResults.add(Pair(receiverName, registrationStatus))
         }
 
-        generateReceiversExcelReport(results)
+        generateCombinedExcelReport(permissionsResults, receiversResults)
     }
-    private fun generateReceiversExcelReport(results: List<Pair<String, String>>) {
 
+
+    private fun generateCombinedExcelReport(
+
+        permissionsResults: List<Pair<String, String>>,
+        receiversResults: List<Pair<String, String>>
+    ) {
         val workbook = XSSFWorkbook()
-        val sheet = workbook.createSheet("Broadcast Receivers Report")
 
-        val headerRow = sheet.createRow(0)
-        headerRow.createCell(0).setCellValue("Receiver")
-        headerRow.createCell(1).setCellValue("Status")
+        val permissionsSheet = workbook.createSheet("Permissions Report")
+        val headerRowPermissions = permissionsSheet.createRow(0)
+        headerRowPermissions.createCell(0).setCellValue("Permission")
+        headerRowPermissions.createCell(1).setCellValue("Status")
 
-        results.forEachIndexed { index, result ->
-            val row: Row = sheet.createRow(index + 1)
+        permissionsResults.forEachIndexed { index, result ->
+            val row = permissionsSheet.createRow(index + 1)
             row.createCell(0).setCellValue(result.first)
             row.createCell(1).setCellValue(result.second)
         }
+        permissionsSheet.setColumnWidth(0, getMaxLength(permissionsResults) * 256)
+        permissionsSheet.setColumnWidth(1, getMaxLength(permissionsResults) * 256)
 
-        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256)
-        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256)
 
+        val receiversSheet = workbook.createSheet("Broadcast Receivers Report")
+        val headerRowReceivers = receiversSheet.createRow(0)
+        headerRowReceivers.createCell(0).setCellValue("Receiver")
+        headerRowReceivers.createCell(1).setCellValue("Status")
+
+        receiversResults.forEachIndexed { index, result ->
+            val row = receiversSheet.createRow(index + 1)
+            row.createCell(0).setCellValue(result.first)
+            row.createCell(1).setCellValue(result.second)
+        }
+        receiversSheet.setColumnWidth(0, getMaxLength(receiversResults) * 256)
+        receiversSheet.setColumnWidth(1, getMaxLength(receiversResults) * 256)
+        
         val externalStorageDir = Environment.getExternalStorageDirectory()
         val xlsFolder = File(externalStorageDir, "xlsx")
-
         if (!xlsFolder.exists()) {
             xlsFolder.mkdirs()
         }
 
-        val documentId  = System.currentTimeMillis().toString()
-        val file = File(xlsFolder, "broadcast_receivers_report$documentId.xlsx")
+        val documentId = System.currentTimeMillis().toString()
+        val file = File(xlsFolder, "combined_report_$documentId.xlsx")
 
         try {
             val fileOutputStream = FileOutputStream(file)
             workbook.write(fileOutputStream)
-
             fileOutputStream.flush()
             fileOutputStream.close()
 
@@ -257,253 +244,6 @@ class MainActivity : AppCompatActivity() {
             checkPermissionsAndGenerateReport()
         }
     }
-    private fun setUpUI(){
-
-        binding.switchCompat1.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result1.setTextColor(resources.getColor(R.color.greenColor))
-                if(testWriteSecureSettings()){
-                    binding.result1.text = "Possible"
-                    binding.result1.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Successfully changed Secure Settings",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result1.text = "Not Possible"
-                    binding.result1.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Permission denied",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result1.text = "--"
-                binding.result1.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat2.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result2.setTextColor(resources.getColor(R.color.greenColor))
-                if(installApkSilently()){
-                    binding.result2.text = "Possible"
-                    binding.result2.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this, "Silent installation triggered", Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result2.text = "Not Possible"
-                    binding.result2.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this, "Failed to install APK silently", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result2.text = "--"
-                binding.result2.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat3.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result3.setTextColor(resources.getColor(R.color.greenColor))
-                if(isSystemApp()){
-                    binding.result3.text = "Possible"
-                    binding.result3.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Success checking system app",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result3.text = "Not Possible"
-                    binding.result3.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Error checking system app",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result3.text = "--"
-                binding.result3.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat4.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result4.setTextColor(resources.getColor(R.color.greenColor))
-                if(testInternalApis()){
-                    binding.result4.text = "Possible"
-                    binding.result4.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Access to internal API succeeded",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result4.text = "Not Possible"
-                    binding.result4.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Access to internal API failed",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result4.text = "--"
-                binding.result4.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat5.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result5.setTextColor(resources.getColor(R.color.greenColor))
-                if(isUpgradingExistingSystemApp("com.deep.system")){
-                    binding.result5.text = "Possible"
-                    binding.result5.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Systep App Upgrade Success",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result5.text = "Not Possible"
-                    binding.result5.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"System App Upgrade Failed",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result5.text = "--"
-                binding.result5.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat6.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result6.setTextColor(resources.getColor(R.color.redColor))
-                if(testRootAccess()){
-                    binding.result6.text = "Possible"
-                    binding.result6.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Root access available!",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result6.text = "Not Possible"
-                    binding.result6.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Root access denied.",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result6.text = "--"
-                binding.result6.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat7.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result7.setTextColor(resources.getColor(R.color.redColor))
-                if(testModifyOtherAppData()){
-                    binding.result7.text = "Not Possible"
-                    binding.result7.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Success.",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result7.text = "Not Possible"
-                    binding.result7.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Selinux blocked data ,Cannot access other app’s data.",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result7.text = "--"
-                binding.result7.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat8.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result8.setTextColor(resources.getColor(R.color.redColor))
-                if(testModifyKernel()){
-                    binding.result8.text = "Possible"
-                    binding.result8.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Kernel modification successful!",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result8.text = "Not Possible"
-                    binding.result8.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Kernel modification failed!",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result8.text = "--"
-                binding.result8.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat9.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result9.setTextColor(resources.getColor(R.color.redColor))
-                if(testSandboxBypass()){
-                    binding.result9.text = "Possible"
-                    binding.result9.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Success bypassing sandbox",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result9.text = "Not Possible"
-                    binding.result9.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Failed to bypass sandbox",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result9.text = "--"
-                binding.result9.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat10.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result10.text = "Not Possible"
-                binding.result10.setTextColor(resources.getColor(R.color.redColor))
-                if(testDisableFRP()){
-                    Toast.makeText(this,"Disabled FRP!",Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this,"FRP is protected",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result10.text = "--"
-                binding.result10.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat11.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                if(setWiFiEnabled()){
-                    binding.result11.text = "Possible"
-                    binding.result11.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Wifi Enabled Successfully",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result11.text = "Not Possible"
-                    binding.result11.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Wifi Disabled",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result11.text = "--"
-                binding.result11.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat12.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result12.setTextColor(resources.getColor(R.color.redColor))
-                if(setMobileDataEnabled()){
-                    binding.result12.text = "Possible"
-                    binding.result12.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Mobile data enabled",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result12.text = "Not Possible"
-                    binding.result12.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Mobile data disabled",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result12.text = "--"
-                binding.result12.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-        binding.switchCompat13.setOnCheckedChangeListener { buttonView, isChecked ->
-
-            if(isChecked){
-                binding.result13.setTextColor(resources.getColor(R.color.redColor))
-                if(setAirplaneMode()){
-                    binding.result13.text = "Possible"
-                    binding.result13.setTextColor(resources.getColor(R.color.greenColor))
-                    Toast.makeText(this,"Airplane mode enabled",Toast.LENGTH_LONG).show()
-                } else {
-                    binding.result13.text = "Not Possible"
-                    binding.result13.setTextColor(resources.getColor(R.color.redColor))
-                    Toast.makeText(this,"Failed to enable airplane mode",Toast.LENGTH_LONG).show()
-                }
-            } else {
-                binding.result13.text = "--"
-                binding.result13.setTextColor(resources.getColor(R.color.black))
-            }
-
-        }
-
-    }
     private fun checkPermissionsAndGenerateReport() {
         val results = mutableListOf<Pair<String, String>>()
         checkNextPermission(results)
@@ -511,287 +251,22 @@ class MainActivity : AppCompatActivity() {
     private fun checkNextPermission(results: MutableList<Pair<String, String>>) {
         if (currentPermissionIndex < permissionsToCheck.size) {
             val fullPermission = permissionsToCheck[currentPermissionIndex]
-            val permissionName = fullPermission.substringAfterLast(".") // Extracts only the name
+            val permissionName = fullPermission.substringAfterLast(".")
             val isGranted = checkSelfPermission(fullPermission) == PackageManager.PERMISSION_GRANTED
             val status = if (isGranted) "Granted" else "Not Granted"
 
             results.add(Pair(permissionName, status))
-            Toast.makeText(this, "$permissionName: $status", Toast.LENGTH_SHORT).show()
 
             handler.postDelayed({
                 currentPermissionIndex++
                 checkNextPermission(results)
-            }, 1000)
+            }, 200)
         } else {
-            // Run this only once when all permissions are checked
-            generateExcelReport(results)
-        }
-    }
-    private fun generateExcelReport(results: List<Pair<String, String>>) {
-
-
-        val workbook = XSSFWorkbook()
-        val sheet = workbook.createSheet("Permissions Report")
-
-        val headerRow = sheet.createRow(0)
-        headerRow.createCell(0).setCellValue("Permission")
-        headerRow.createCell(1).setCellValue("Status")
-
-        results.forEachIndexed { index, result ->
-            val row: Row = sheet.createRow(index + 1)
-            row.createCell(0).setCellValue(result.first)
-            row.createCell(1).setCellValue(result.second)
-        }
-
-        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256)
-        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256)
-
-        val externalStorageDir = Environment.getExternalStorageDirectory()
-        val xlsFolder = File(externalStorageDir, "xlsx")
-
-        if (!xlsFolder.exists()) {
-            xlsFolder.mkdirs()
-        }
-        val documentId  = System.currentTimeMillis().toString()
-        val file = File(xlsFolder, "permissions_report$documentId.xlsx")
-
-        try {
-            val fileOutputStream = FileOutputStream(file)
-            workbook.write(fileOutputStream)
-
-            fileOutputStream.flush()
-            fileOutputStream.close()
-
-            Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
-
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to save Excel report", Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        } finally {
-            try {
-                workbook.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-    private fun getMaxLength(results: List<Pair<String, String>>, columnIndex: Int): Int {
-        var maxLength = 0
-        results.forEach {
-            val length = it.toList()[columnIndex].length
-            if (length > maxLength) {
-                maxLength = length
-            }
-        }
-        return maxLength
-    }
-
-    
-    ////////////////////////////////////////////////
-
-    private fun testWriteSecureSettings() : Boolean {
-        try {
-            Settings.Global.putString(contentResolver, "adb_enabled", "1")
-            return true
-        } catch (e: SecurityException) {
-            return false
-        }
-    }
-    private fun installApkSilently() : Boolean {
-        try {
-            val packageInstaller = packageManager.packageInstaller
-            val sessionParams = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-            val sessionId = packageInstaller.createSession(sessionParams)
-            val session = packageInstaller.openSession(sessionId)
-
-            val apkFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "base.apk")
-            apkFile.inputStream().use { inputStream ->
-                session.openWrite("base.apk", 0, apkFile.length()).use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                    session.fsync(outputStream)
-                }
-            }
-
-            // Create an IntentSender using a PendingIntent
-            val intent = Intent(this, InstallResultReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            )
-            val intentSender = pendingIntent.intentSender
-
-            session.commit(intentSender)
-            return true
-        } catch (e: Exception) {
-            return false
-        }
-    }
-    private fun isSystemApp(): Boolean {
-        val systemAppPaths = listOf("/system/app/", "/system/priv-app/")
-        return try {
-            val apkPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            systemAppPaths.any { File(apkPath, "base.apk").exists() }
-        } catch (e: Exception) {
-            false
-        }
-    }
-    @SuppressLint("PrivateApi")
-    private fun testInternalApis() : Boolean {
-        try {
-            Class.forName("com.android.internal.app.ActivityTrigger")
-            return true
-        } catch (e: ClassNotFoundException) {
-            return false
-        }
-    }
-    private fun isUpgradingExistingSystemApp(packageName: String): Boolean {
-        return try {
-            val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
-            (packageInfo.applicationInfo!!.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e("SystemAppTest", "App not found: ${e.message}")
-            false
-        }
-    }
-    private fun getApkSignature(packageName: String, packageManager: PackageManager): String? {
-        return try {
-            val packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            val signature = packageInfo.signatures?.get(0)?.toByteArray()
-            val md = MessageDigest.getInstance("SHA")
-            md.update(signature)
-            md.digest().joinToString(":") { "%02x".format(it) }
-        } catch (e: Exception) {
-            Log.e("SystemAppTest", "Failed to get signature: ${e.message}")
-            null
-        }
-    }
-    private fun compareWithSystemAppSignature(systemAppPackage: String): Boolean {
-        val mySignature = getApkSignature(packageName, packageManager)
-        val systemSignature = getApkSignature(systemAppPackage, packageManager)
-
-        Log.d("SystemAppTest", "My Signature: $mySignature")
-        Log.d("SystemAppTest", "System App Signature: $systemSignature")
-
-        return mySignature == systemSignature
-    }
-
-
-    /////////////////////
-
-    private fun testRootAccess() : Boolean {
-        try {
-            val process = Runtime.getRuntime().exec("su")
-            val output = BufferedReader(InputStreamReader(process.inputStream)).readLine()
-            if (output != null) {
-                return true
-            } else {
-                return false
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this,"Failed to execute root command",Toast.LENGTH_LONG).show()
-            return false
-        }
-    }
-    private fun testModifyOtherAppData() : Boolean {
-        val targetPath = File("/data/data/com.other.app/files/test.txt")
-        try {
-            if (targetPath.exists()) {
-                targetPath.writeText("Test")
-                return true
-            } else {
-                return false
-            }
-        } catch (e: Exception) {
-            return false
-        }
-    }
-    private fun testSandboxBypass() : Boolean {
-        val targetFile = File("/data/data/com.some.other.app/shared_prefs/config.xml")
-        try {
-            if (targetFile.exists()) {
-                targetFile.readText()
-                return true
-            } else {
-                return false
-            }
-        } catch (e: Exception) {
-            return false
-        }
-    }
-    private fun testDisableFRP() : Boolean {
-        try {
-            Settings.Global.putInt(contentResolver, "device_provisioned", 0)
-            return true
-        } catch (e: SecurityException) {
-            return false
-        }
-    }
-    private fun testModifyKernel() : Boolean {
-        val cpuFile = File("/proc/sys/kernel/hostname")
-        try {
-            if (cpuFile.exists()) {
-                cpuFile.writeText("HackedKernel")
-                return true
-            } else {
-                Log.e("SystemAppTest", "Cannot modify kernel settings.")
-                return false
-            }
-        } catch (e: Exception) {
-            Log.e("SystemAppTest", "Kernel protection blocked modification: ${e.message}")
-            return false
-        }
-    }
-    private fun setAirplaneMode() : Boolean {
-        try {
-
-            Settings.Global.putInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 1)
-            val intent = Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-            intent.putExtra("state", true)
-            sendBroadcast(intent)
-            return true
-        } catch (e: SecurityException) {
-            Log.e("SystemAppTest", "Permission denied: ${e.message}")
-            return false
-        } catch (e: Exception) {
-            Log.e("SystemAppTest", "Failed to change Airplane mode: ${e.message}")
-            return false
-        }
-    }
-    private fun setMobileDataEnabled() : Boolean {
-        try {
-            Settings.Global.putInt(contentResolver, "mobile_data", 1)
-            return true
-        } catch (e: SecurityException) {
-            Log.e("SystemAppTest", "Permission denied: ${e.message}")
-            return false
-        } catch (e: Exception) {
-            Log.e("SystemAppTest", "Failed to change mobile data state: ${e.message}")
-            return false
-        }
-    }
-    private fun setWiFiEnabled() : Boolean {
-        try {
-            val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
-            wifiManager.isWifiEnabled = true
-            return true
-        } catch (e: SecurityException) {
-            Log.e("SystemAppTest", "Permission denied: ${e.message}")
-            return false
-        } catch (e: Exception) {
-            Log.e("SystemAppTest", "Failed to change WiFi state: ${e.message}")
-            return false
+            checkBroadcastReceivers(results)
         }
     }
 
-    /// RECEIVER
-    class InstallResultReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val status = intent?.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)
-            if (status == PackageInstaller.STATUS_SUCCESS) {
-                Toast.makeText(context, "Silent installation succeeded!", Toast.LENGTH_LONG).show()
-            } else {
-                val message = intent?.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-                Toast.makeText(context, "Silent installation failed: $message", Toast.LENGTH_LONG).show()
-            }
-        }
+    private fun getMaxLength(results: List<Pair<String, String>>): Int {
+        return results.maxOf { it.first.length }
     }
 }
