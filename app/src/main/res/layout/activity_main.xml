@@ -15,17 +15,37 @@
         android:layout_marginBottom="20dp"
         tools:context=".MainActivity">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Features"
-            android:fontFamily="sans-serif-condensed-medium"
-            style="@style/TextAppearance.AppCompat.Large"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_margin="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="horizontal">
+
+           <TextView
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="Features"
+               android:fontFamily="sans-serif-condensed-medium"
+               style="@style/TextAppearance.AppCompat.Large"
+               app:layout_constraintBottom_toBottomOf="parent"
+               android:layout_margin="15dp"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintTop_toTopOf="parent" />
+
+           <Space
+               android:layout_width="0dp"
+               android:layout_weight="1"
+               android:layout_height="wrap_content"/>
+
+           <ImageView
+               android:id="@+id/file"
+               android:layout_width="30dp"
+               android:layout_height="30dp"
+               android:layout_margin="20dp"
+               android:src="@drawable/file"
+               app:tint="@color/white" />
+
+       </LinearLayout>
 
         <View
             android:layout_width="match_parent"

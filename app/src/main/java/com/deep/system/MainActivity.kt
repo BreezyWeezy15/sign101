@@ -41,6 +41,35 @@ import java.security.MessageDigest
 
 class MainActivity : AppCompatActivity() {
 
+    private val broadcastActions = listOf(
+        Intent.ACTION_POWER_CONNECTED,
+        Intent.ACTION_POWER_DISCONNECTED,
+        Intent.ACTION_BOOT_COMPLETED,
+        Intent.ACTION_SCREEN_ON,
+        Intent.ACTION_SCREEN_OFF,
+        Intent.ACTION_PACKAGE_ADDED,
+        Intent.ACTION_PACKAGE_REMOVED,
+        Intent.ACTION_PACKAGE_REPLACED,
+        Intent.ACTION_BATTERY_LOW,
+        Intent.ACTION_BATTERY_OKAY,
+        Intent.ACTION_AIRPLANE_MODE_CHANGED,
+        Intent.ACTION_HEADSET_PLUG,
+        Intent.ACTION_MEDIA_MOUNTED,
+        Intent.ACTION_MEDIA_UNMOUNTED,
+        Intent.ACTION_TIME_TICK,
+        Intent.ACTION_TIME_CHANGED,
+        Intent.ACTION_DATE_CHANGED,
+        Intent.ACTION_CONFIGURATION_CHANGED,
+        Intent.ACTION_LOCALE_CHANGED,
+        Intent.ACTION_DREAMING_STARTED,
+        Intent.ACTION_DREAMING_STOPPED,
+        Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+        Intent.ACTION_MEDIA_SCANNER_STARTED,
+        Intent.ACTION_MEDIA_SCANNER_FINISHED,
+        Intent.ACTION_UID_REMOVED,
+        Intent.ACTION_WALLPAPER_CHANGED,
+        Intent.ACTION_PACKAGE_RESTARTED
+    )
     private val permissionsToCheck = listOf(
         "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS",
         "android.permission.ACCESS_NETWORK_STATE",
@@ -104,12 +133,11 @@ class MainActivity : AppCompatActivity() {
     )
     private var currentPermissionIndex = 0
     private val handler = Handler(Looper.getMainLooper())
-
     private val manageStoragePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (isManageExternalStorageGranted()) {
                 Toast.makeText(this, "Permission Granted!", Toast.LENGTH_SHORT).show()
-                checkPermissionsAndGenerateReport() // Execute after permission is granted
+                checkPermissionsAndGenerateReport()
             } else {
                 Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show()
             }
@@ -127,17 +155,85 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
         setUpUI()
+        binding.file.setOnClickListener {
+            checkBroadcastReceivers()
+        }
 
     }
 
+    private fun checkBroadcastReceivers() {
+        val packageManager = packageManager
+        val packageName = packageName
 
+        val results = mutableListOf<Pair<String, String>>()
+
+        for (action in broadcastActions) {
+
+            val intent = Intent(action)
+            val receivers = packageManager.queryBroadcastReceivers(intent, PackageManager.MATCH_ALL)
+            val isRegisteredForApp = receivers.any { it.activityInfo.packageName == packageName }
+            val receiverName = action.substringAfterLast(".")
+            val registrationStatus = if (isRegisteredForApp) "Registered" else "Not Registered"
+            results.add(Pair(receiverName, registrationStatus))
+            val message = "$receiverName: $registrationStatus"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            Log.d("BroadcastCheck", message)
+        }
+
+        generateReceiversExcelReport(results)
+    }
+    private fun generateReceiversExcelReport(results: List<Pair<String, String>>) {
+        val workbook = XSSFWorkbook()
+        val sheet = workbook.createSheet("Broadcast Receivers Report")
+
+        // Create header row
+        val headerRow = sheet.createRow(0)
+        headerRow.createCell(0).setCellValue("Receiver Name")
+        headerRow.createCell(1).setCellValue("Registration Status")
+        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256)
+        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256)
+        results.forEachIndexed { index, result ->
+            val row: Row = sheet.createRow(index + 1)
+            row.createCell(0).setCellValue(result.first)
+            row.createCell(1).setCellValue(result.second)
+        }
+
+        val externalStorageDir = Environment.getExternalStorageDirectory()
+        val xlsFolder = File(externalStorageDir, "xlsx")
+
+        if (!xlsFolder.exists()) {
+            xlsFolder.mkdirs()
+        }
+
+        val file = File(xlsFolder, "broadcast_receivers_report.xlsx")
+
+        try {
+            val fileOutputStream = FileOutputStream(file)
+            workbook.write(fileOutputStream)
+
+            fileOutputStream.flush()
+            fileOutputStream.close()
+
+            Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
+
+        }
+        catch (e: Exception) {
+            Toast.makeText(this, "Failed to save Excel report", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
+        finally {
+            try {
+                workbook.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
     override fun onResume() {
         super.onResume()
         checkAndRequestManageExternalStorage()
     }
-
     private fun isManageExternalStorageGranted(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
@@ -145,7 +241,6 @@ class MainActivity : AppCompatActivity() {
             true
         }
     }
-
     private fun checkAndRequestManageExternalStorage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!isManageExternalStorageGranted()) {
@@ -160,8 +255,6 @@ class MainActivity : AppCompatActivity() {
             checkPermissionsAndGenerateReport()
         }
     }
-
-
     private fun setUpUI(){
 
         binding.switchCompat1.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -409,12 +502,10 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
     private fun checkPermissionsAndGenerateReport() {
         val results = mutableListOf<Pair<String, String>>()
         checkNextPermission(results)
     }
-
     private fun checkNextPermission(results: MutableList<Pair<String, String>>) {
         if (currentPermissionIndex < permissionsToCheck.size) {
             val fullPermission = permissionsToCheck[currentPermissionIndex]
@@ -423,7 +514,7 @@ class MainActivity : AppCompatActivity() {
             val status = if (isGranted) "Granted" else "Not Granted"
 
             results.add(Pair(permissionName, status))
-            showToast(permissionName, isGranted)
+            Toast.makeText(this, "$permissionName: $status", Toast.LENGTH_SHORT).show()
 
             handler.postDelayed({
                 currentPermissionIndex++
@@ -434,20 +525,12 @@ class MainActivity : AppCompatActivity() {
             generateExcelReport(results)
         }
     }
-
-    private fun showToast(permissionName: String, isGranted: Boolean) {
-        val status = if (isGranted) "Granted" else "Not Granted"
-        Toast.makeText(this, "$permissionName: $status", Toast.LENGTH_SHORT).show()
-    }
-
     private fun generateExcelReport(results: List<Pair<String, String>>) {
-
 
 
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet("Permissions Report")
 
-        // Create header row
         val headerRow = sheet.createRow(0)
         headerRow.createCell(0).setCellValue("Permission")
         headerRow.createCell(1).setCellValue("Status")
@@ -458,28 +541,24 @@ class MainActivity : AppCompatActivity() {
             row.createCell(1).setCellValue(result.second)
         }
 
-        // Manually adjust the column width based on the content
-        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256) // Permission column
-        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256) // Status column
+        sheet.setColumnWidth(0, getMaxLength(results, 0) * 256)
+        sheet.setColumnWidth(1, getMaxLength(results, 1) * 256)
 
-        // Define external storage directory
         val externalStorageDir = Environment.getExternalStorageDirectory()
         val xlsFolder = File(externalStorageDir, "xlsx")
 
         if (!xlsFolder.exists()) {
-            xlsFolder.mkdirs() // Create folder if it doesn't exist
+            xlsFolder.mkdirs()
         }
         val documentId  = System.currentTimeMillis().toString()
         val file = File(xlsFolder, "permissions_report$documentId.xlsx")
 
         try {
-            // Use FileOutputStream to write the workbook to the file
             val fileOutputStream = FileOutputStream(file)
             workbook.write(fileOutputStream)
 
-            // Close the file output stream to properly save the file
-            fileOutputStream.flush() // Ensure all data is written
-            fileOutputStream.close() // Properly close the stream
+            fileOutputStream.flush()
+            fileOutputStream.close()
 
             Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
 
@@ -488,17 +567,14 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         } finally {
             try {
-                workbook.close() // Ensure workbook is closed after writing
+                workbook.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
-
-    // Function to calculate the maximum length of content in the specified column
     private fun getMaxLength(results: List<Pair<String, String>>, columnIndex: Int): Int {
         var maxLength = 0
-        // Calculate the maximum length of the content in the column
         results.forEach {
             val length = it.toList()[columnIndex].length
             if (length > maxLength) {
@@ -509,6 +585,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+    ////////////////////////////////////////////////
 
     private fun testWriteSecureSettings() : Boolean {
         try {

@@ -71,7 +71,6 @@
 
 
     <application
-        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:requestLegacyExternalStorage="true"
