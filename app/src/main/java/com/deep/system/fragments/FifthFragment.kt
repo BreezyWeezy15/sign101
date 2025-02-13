@@ -31,7 +31,7 @@ class FifthFragment : Fragment() {
         val result = getDummyMap()
         binding.valueTxt.text = result
         FirstFragment.dataList.add("Fifth Fragment" to result)
-
+        binding.stepsTxt.text = "Checking 5th item"
         saveToExcel()
     }
 
@@ -68,12 +68,12 @@ class FifthFragment : Fragment() {
                 row.createCell(0).setCellValue(functionName)
                 row.createCell(1).setCellValue(result)
             }
-            
+
             val fos = FileOutputStream(file)
             workbook.write(fos)
             fos.close()
             workbook.close()
-
+            binding.stepsTxt.text = "All Items Checked"
             Toast.makeText(requireContext(), "Excel File Saved", Toast.LENGTH_LONG).show()
 
         } catch (e: IOException) {

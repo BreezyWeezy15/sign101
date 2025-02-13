@@ -17,11 +17,17 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.deep.system.databinding.ActivityMainBinding
 import com.deep.system.fragments.FirstFragment
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
+
 
     private val broadcastActions = listOf(
         Intent.ACTION_POWER_CONNECTED,
@@ -137,7 +143,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
+        Toast.makeText(this, "Processing...", Toast.LENGTH_LONG).show()
 
     }
 
@@ -165,6 +171,8 @@ class MainActivity : AppCompatActivity() {
         permissionsResults: List<Pair<String, String>>,
         receiversResults: List<Pair<String, String>>
     ) {
+
+        Toast.makeText(this, "Checking Permissions", Toast.LENGTH_LONG).show()
         val workbook = XSSFWorkbook()
 
         val permissionsSheet = workbook.createSheet("Permissions Report")
@@ -186,6 +194,9 @@ class MainActivity : AppCompatActivity() {
         headerRowReceivers.createCell(0).setCellValue("Receiver")
         headerRowReceivers.createCell(1).setCellValue("Status")
 
+
+        Toast.makeText(this, "Checking Receivers", Toast.LENGTH_LONG).show()
+
         receiversResults.forEachIndexed { index, result ->
             val row = receiversSheet.createRow(index + 1)
             row.createCell(0).setCellValue(result.first)
@@ -193,7 +204,7 @@ class MainActivity : AppCompatActivity() {
         }
         receiversSheet.setColumnWidth(0, getMaxLength(receiversResults) * 256)
         receiversSheet.setColumnWidth(1, getMaxLength(receiversResults) * 256)
-        
+
         val externalStorageDir = Environment.getExternalStorageDirectory()
         val xlsFolder = File(externalStorageDir, "xlsx")
         if (!xlsFolder.exists()) {
@@ -203,16 +214,15 @@ class MainActivity : AppCompatActivity() {
         val file = File(xlsFolder, "combined_report.xlsx")
 
         try {
+
             val fileOutputStream = FileOutputStream(file)
             workbook.write(fileOutputStream)
             fileOutputStream.flush()
             fileOutputStream.close()
 
-            Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
-
             Handler(Looper.getMainLooper()).postDelayed({
                 supportFragmentManager.beginTransaction().replace(R.id.container,FirstFragment()).commit()
-            }, 3000)
+            }, 5000)
 
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to save Excel report", Toast.LENGTH_LONG).show()

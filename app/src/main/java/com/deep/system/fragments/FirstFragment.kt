@@ -29,6 +29,7 @@ class FirstFragment : Fragment() {
         binding.valueTxt.text = result
         dataList.add("First Fragment" to result) // Store function name & value
 
+        binding.stepsTxt.text = "Checking 1st item"
         Handler(Looper.getMainLooper()).postDelayed({
             (requireActivity().supportFragmentManager).beginTransaction().replace(R.id.container, SecondFragment()).commit()
         }, 3000)

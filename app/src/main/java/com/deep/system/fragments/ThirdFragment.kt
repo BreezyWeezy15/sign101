@@ -25,7 +25,7 @@ class ThirdFragment : Fragment() {
         val result = getDummyBoolean()
         binding.valueTxt.text = result
         FirstFragment.dataList.add("Third Fragment" to result) // Store function name & value
-
+        binding.stepsTxt.text = "Checking 3rd item"
         Handler(Looper.getMainLooper()).postDelayed({
             (requireActivity().supportFragmentManager).beginTransaction().replace(R.id.container, FourthFragment()).commit()
         }, 3000)
