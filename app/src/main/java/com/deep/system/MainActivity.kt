@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.deep.system.databinding.ActivityMainBinding
+import com.deep.system.fragments.FirstFragment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
@@ -135,6 +136,13 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            supportFragmentManager.beginTransaction().replace(R.id.container,FirstFragment()).commit()
+        }, 3000)
+
+
     }
 
     private fun checkBroadcastReceivers(permissionsResults: List<Pair<String, String>>) {
