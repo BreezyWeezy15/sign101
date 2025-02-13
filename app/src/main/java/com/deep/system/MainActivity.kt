@@ -138,10 +138,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            supportFragmentManager.beginTransaction().replace(R.id.container,FirstFragment()).commit()
-        }, 3000)
-
 
     }
 
@@ -204,8 +200,7 @@ class MainActivity : AppCompatActivity() {
             xlsFolder.mkdirs()
         }
 
-        val documentId = System.currentTimeMillis().toString()
-        val file = File(xlsFolder, "combined_report_$documentId.xlsx")
+        val file = File(xlsFolder, "combined_report.xlsx")
 
         try {
             val fileOutputStream = FileOutputStream(file)
@@ -214,6 +209,10 @@ class MainActivity : AppCompatActivity() {
             fileOutputStream.close()
 
             Toast.makeText(this, "Excel report saved", Toast.LENGTH_LONG).show()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                supportFragmentManager.beginTransaction().replace(R.id.container,FirstFragment()).commit()
+            }, 3000)
 
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to save Excel report", Toast.LENGTH_LONG).show()
