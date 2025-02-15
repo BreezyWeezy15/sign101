@@ -26,9 +26,7 @@ class FourthFragment : Fragment() {
         binding.valueTxt.text = result
         FirstFragment.dataList.add("Fourth Fragment" to result) // Store function name & value
         binding.stepsTxt.text = "Checking 4th item"
-        Handler(Looper.getMainLooper()).postDelayed({
-            (requireActivity().supportFragmentManager).beginTransaction().replace(R.id.container, FifthFragment()).commit()
-        }, 3000)
+        (requireActivity() as? FragmentCompletionListener)?.onFragmentCompleted()
     }
 
     private fun getDummyList(): String {

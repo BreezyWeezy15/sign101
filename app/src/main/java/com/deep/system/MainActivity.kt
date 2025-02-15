@@ -15,18 +15,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.deep.system.databinding.ActivityMainBinding
+import com.deep.system.fragments.FifthFragment
 import com.deep.system.fragments.FirstFragment
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Main
+import com.deep.system.fragments.FourthFragment
+import com.deep.system.fragments.FragmentCompletionListener
+import com.deep.system.fragments.SecondFragment
+import com.deep.system.fragments.ThirdFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() , FragmentCompletionListener {
 
 
     private val broadcastActions = listOf(
@@ -145,6 +148,32 @@ class MainActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Processing...", Toast.LENGTH_LONG).show()
 
+        
+    }
+
+    override fun onFragmentCompleted() {
+        moveToNextFragment()
+    }
+
+    private fun moveToNextFragment() {
+        lifecycleScope.launch {
+            delay(3000) // Wait for 3 seconds before switching
+
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.container)
+            val nextFragment = when (currentFragment) {
+                is FirstFragment -> SecondFragment()
+                is SecondFragment -> ThirdFragment()
+                is ThirdFragment -> FourthFragment()
+                is FourthFragment -> FifthFragment()
+                else -> null
+            }
+
+            nextFragment?.let {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.container, it)
+                    .commit()
+            }
+        }
     }
 
     private fun checkBroadcastReceivers(permissionsResults: List<Pair<String, String>>) {
