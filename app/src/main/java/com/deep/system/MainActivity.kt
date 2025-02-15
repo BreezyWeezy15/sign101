@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() , FragmentCompletionListener {
 
         Toast.makeText(this, "Processing...", Toast.LENGTH_LONG).show()
 
-        
+
     }
 
     override fun onFragmentCompleted() {
@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() , FragmentCompletionListener {
 
     private fun moveToNextFragment() {
         lifecycleScope.launch {
-            delay(3000) // Wait for 3 seconds before switching
+            delay(3000)
 
             val currentFragment = supportFragmentManager.findFragmentById(R.id.container)
             val nextFragment = when (currentFragment) {

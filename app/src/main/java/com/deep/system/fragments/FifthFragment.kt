@@ -63,11 +63,16 @@ class FifthFragment : Fragment() {
                 workbook.createSheet("Dummy Data")
             }
 
+
+
             FirstFragment.dataList.forEachIndexed { index, (functionName, result) ->
                 val row = sheet.createRow(index)
                 row.createCell(0).setCellValue(functionName)
                 row.createCell(1).setCellValue(result)
             }
+
+            sheet.setColumnWidth(0, getMaxLength(FirstFragment.dataList) * 256)
+            sheet.setColumnWidth(1, getMaxLength(FirstFragment.dataList) * 256)
 
             val fos = FileOutputStream(file)
             workbook.write(fos)
@@ -80,5 +85,10 @@ class FifthFragment : Fragment() {
             e.printStackTrace()
             binding.valueTxt.text = "Error saving Excel file: ${e.message}"
         }
+    }
+
+
+    private fun getMaxLength(results: List<Pair<String, String>>): Int {
+        return results.maxOf { it.first.length }
     }
 }
